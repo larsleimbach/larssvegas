@@ -1,0 +1,207 @@
+
+/*
+uint16_t returnCorrectRandomIndexIn_S(){
+    uint16_t r = rand()%unusedValuesIn_S;
+    for (uint16_t i = 0; i <= r ; i++) {
+        if(i >= S1_SIZE){
+            printf("\n\nError:      Index out of Bound\n");
+            exit(1);
+        }
+        else if (S[i] == 0){
+            //wir wollen den r.ten unbenutzen Eintrag
+            r++;
+        }
+    }
+    return r;
+}
+
+uint16_t returnNumberOfPossibleChildren(Data data){
+    uint16_t countOtherSolutions = 0;
+    for (uint16_t i = 0; i <= S1_SIZE ; i++) {
+        if (data.data+summe < goals[GOAL_NUMBER]) {
+            countOtherSolutions
+        }
+    }
+}*/
+
+
+
+
+            if(backtrackStack_fillSize == 0 && unusedValuesIn_S > 0){
+                //es gibt also ein Knoten der geht
+                unusedValuesIn_S--;
+                //entblocke alle
+                for (uint16_t i = 0; i < S1_SIZE ; i++){
+                    dataArray[i].bool_darfAusgewaehltWerden = 1;
+                }
+                
+                
+                Data *data;
+                int foundSomething = searchForUnusedValue(data);//finde Knoten
+                if (foundSomething == -1) {
+                    printf("\nno solution. And there went something wrong\n");
+                    exit(0);
+                }
+                else if (foundSomething){
+                    stackPush(backtrackStack, data);
+                    continue;
+                }
+                else{
+                    printf("\nAnd there went something wrong\n");
+                    exit(1);
+                }
+            }
+            else{
+                printf("\nno solution.\n");
+                exit(0);
+            }
+
+
+
+
+    //now make Data Array Random!
+    for (uint16_t i = 0; i < NUMBERS_OF_PERMUTATIONS ; i++) {
+        uint16_t r1 = random()%S1_SIZE;
+        uint16_t r2 = random()%S1_SIZE;
+        
+        Data tmp = dataArray[r1];
+        dataArray[r1] = dataArray[r2];
+        dataArray[r2] = tmp;
+    }
+
+
+//alte Main
+
+int main(){
+    
+    //aufgabe 10.1 a)
+    srand(time(NULL)); //for random number
+    makeDataArrayAndStack();
+    uint64_t solutionCount = 0;
+    uint8_t bool_foundNothing = 1;
+    Data dummData;
+    dummData.bool_darfAusgewaehltWerden = 1;
+    dummData.bool_hasValue = 0;
+    dummData.indexOfLastPossiboeData = -1;
+    dummyData = &(dummData);
+    
+    resetStackAndDataArray();
+    
+    for (uint16_t startKnoten = 0;startKnoten < S1_SIZE; startKnoten++) {
+        
+        
+        
+        
+        searchForChildren(&(dataArray[startKnoten]));
+        stackPush(backtrackStack, &(dataArray[startKnoten]));
+        summe += dataArray[startKnoten].data;
+        
+        do{
+            if(summe < goals[GOAL_NUMBER]){//wenn kleiner ist brauche  wir ja noch mehr summanden aus S
+                //tue einen der ausgewaehlt werden darf auf stack
+                Data *firstOnStack = stackGetFirst(backtrackStack);
+                
+                if(firstOnStack == NULL){
+                    //nothing on the stack??
+                    printf("\nNothing on the stack!\n\n");
+                    exit(1);
+                }
+                int indexOfNextData = -1;
+                if(firstOnStack->indexOfLastPossiboeData>=0){
+                    //has children
+                    indexOfNextData = firstOnStack->indexOfOtherPossibleData[firstOnStack->indexOfLastPossiboeData];
+                    firstOnStack->indexOfLastPossiboeData--;
+                }
+                else{
+                    //has no children-> backtrack
+                    Data *popedData = stackPop(backtrackStack);
+                    summe -= popedData->data;
+                    //dont choose it again in partent Data
+                    Data *parentData = stackGetFirst(backtrackStack);
+                    if (parentData != NULL) {
+                        //current Data is root
+                        parentData->indexOfLastPossiboeData--;
+                    }
+                    else{
+                        //root has no children -> next root node
+                        break;
+                    }
+                    
+                    continue;
+                }
+                
+                Data *childData = &(dataArray[indexOfNextData]);
+                
+
+                searchForChildren(childData);
+                summe += childData->data;
+                stackPush(backtrackStack, childData);
+
+            }
+            else if (summe > goals[GOAL_NUMBER]){//backtrack
+                //summe ist zu gross also loesche aktiellen knoten aus Stack
+                Data *popedData = stackPop(backtrackStack);
+                summe -= popedData->data;
+                if (summe < 0) {
+                    printf("summe: %d should not be negative",summe);
+                    exit(1);
+                }
+                //dont choose it again in partent Data
+                Data *parentData = stackGetFirst(backtrackStack);
+                if (parentData != NULL) {
+                    //current Data is root
+                    parentData->indexOfLastPossiboeData--;
+                }
+                else{
+                    //root has no children -> next root node
+                    break;
+                }
+            }
+            
+            
+            if (summe == goals[GOAL_NUMBER]) {
+                printSolution10_1();
+                solutionCount++;
+                //printf("%" PRIu64 "\n",solutionCount);
+                //backTrack
+                Data *popedData = stackPop(backtrackStack);
+                summe -= popedData->data;
+                //dont choose it again in partent Data
+                Data *parentData = stackGetFirst(backtrackStack);
+                if (parentData != NULL) {
+                    //current Data is root
+                    parentData->indexOfLastPossiboeData--;
+                }
+                else{
+                    //root has no children -> next root node
+                    break;
+                }
+            }
+            
+
+        } while (dataArray[startKnoten].indexOfLastPossiboeData > -1);
+        
+        printf("%" PRIu64 "\n",solutionCount);
+        dataArray[startKnoten].bool_darfAusgewaehltWerden = 0;//jetzt hast du ja schon alle loesungen die in denen startknoten vorkommt
+    }
+    
+    if(bool_foundNothing != 0){
+        
+        printf("\nNo Solution.\n\n");
+    }
+
+    return 0;
+}
+
+
+// only 7 solutions
+
+            uint16_t newSum = dataArray[i].data + storageForDynProg[j];
+            
+            if (binSearch_uint(storageForDynProg, newSum,currentSizeOfStorage) == -1) {
+                //is noch nicht drin setzte ein
+                storageForDynProg[currentSizeOfStorage] = newSum;
+                currentSizeOfStorage++;
+                insertionSort_uint(storageForDynProg,currentSizeOfStorage);
+                printf("%d\n",storageForDynProg[currentSizeOfStorage-1]);
+            }
